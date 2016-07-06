@@ -4,6 +4,6 @@ import (
   "./bot"
 )
 
-func StartBot()  {
+func main()  {
   bot.Connect()
 }

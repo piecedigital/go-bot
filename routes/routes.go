@@ -5,6 +5,7 @@ import (
   "io"
   "net/http"
   "regexp"
+  "../socket"
 )
 
 var methodMap = map[string]map[string](func(res http.ResponseWriter, req *http.Request) int) {
@@ -13,7 +14,8 @@ var methodMap = map[string]map[string](func(res http.ResponseWriter, req *http.R
 
 var pathMapGET = map[string](func(res http.ResponseWriter, req *http.Request) int) {
   "/": indexGet,
-  "/bot": botGet,
+  "/bot-page": botGet,
+  "/bot": socket.StartSockets,
 }
 
 func PipeRequests(res http.ResponseWriter, req *http.Request) {
@@ -50,6 +52,6 @@ func indexGet(res http.ResponseWriter, req *http.Request) int {
 }
 
 func botGet(res http.ResponseWriter, req *http.Request) int {
-  io.WriteString(res, "<h1>This will be the bot page.</h1>")
+  http.ServeFile(res, req, "./views/bot-page.html")
   return 200
 }

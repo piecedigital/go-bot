@@ -2,18 +2,18 @@ package bot
 
 import (
   "fmt"
+  // "errors"
   // "io"
   "time"
-  "../private"
   "gopkg.in/sorcix/irc.v1"
+  "golang.org/x/net/websocket"
+  "../private"
+  "regexp"
 )
 
-var server = "irc.chat.twitch.tv"
-var port = "6667"
-
-type ConnData struct {
-  username, authToken string
-}
+const server = "irc.chat.twitch.tv"
+const port = "6667"
+var botAccount = "piecedigital"
 
 // const (
 //   millisecond = time.Duration(1 * 1000 * 1000)
@@ -26,45 +26,35 @@ type ConnData struct {
 var retries = 0
 var retryLimit = 10
 
-func Connect() {
+func Connect( send func(ws *websocket.Conn, s string), ws *websocket.Conn ) (*irc.Conn, interface{}) {
   fmt.Println("connecting...")
   conn, connErr := irc.Dial(server + ":" + port)
   if connErr != nil {
     fmt.Println(connErr)
-  } else {
-    retries = 0
-    err := initMsgs(conn)
-    if err != nil {
-      reconnect()
-    } else {
-      for {
-        err := checkForMessags(conn)
-        if err != nil {
-          reconnect()
-        } else {
-          time.Sleep(time.Millisecond)
-        }
-      }
-    }
   }
+  retries = 0
+  err := initMsgs(conn)
+  if err != nil {
+    reconnect(send, ws)
+    return nil, err
+  }
+  for {
+    err := checkForMessags(conn, send, ws)
+    if err != nil {
+      reconnect(send, ws)
+      return nil, err
+    }
+    time.Sleep(time.Millisecond)
+  }
+  return conn, nil
 }
 
-func reconnect() {
+func reconnect( send func(ws *websocket.Conn, s string), ws *websocket.Conn ) {
   if retries < retryLimit {
-    Connect()
+    Connect(send, ws)
   } else {
     fmt.Println("Damn, can't reconnect :/")
   }
-}
-
-func checkForMessags(c *irc.Conn) interface{} {
-  fmt.Println("This happened...")
-  incoming, inerr := c.Decode()
-  if inerr != nil {
-    return inerr
-  }
-  fmt.Println(incoming)
-  return nil
 }
 
 func initMsgs(c *irc.Conn) interface{} {
@@ -93,15 +83,40 @@ var messageSlice = []*irc.Message{
   },
 }
 
+func checkForMessags( c *irc.Conn, send func(ws *websocket.Conn, s string), ws *websocket.Conn ) interface{} {
+  incoming, inerr := c.Decode()
+  if inerr != nil {
+    return inerr
+  }
+  fmt.Printf("[READ] - %v\n", incoming)
+  if incoming.Command == "PRIVMSG" {
+    send(ws, "[" + incoming.Command + "] : [" + incoming.Prefix.User + "] : " + incoming.Trailing)
+    for command, value := range commands {
+      match, _ := regexp.MatchString("^(" + command + ")", incoming.Trailing)
+      if match == true {
+        SendChatMessage(c, &irc.Message{
+          Params: []string{"#" + botAccount},
+          Trailing: value,
+        })
+        return nil
+      }
+    }
+  }
+  return nil
+}
 
-func sendChatMessage(c *irc.Conn, msg string) {
+func SendChatMessage(c *irc.Conn, msg *irc.Message) {
   message := &irc.Message{
-    Params: []string{"#piecedigital"},
+    Params: msg.Params,
     Command: "PRIVMSG",
-    Trailing: "piecedigital the bot has arrived",
+    Trailing: msg.Trailing,
   }
   outerr := c.Encode(message)
   if outerr != nil {
     fmt.Println(outerr)
   }
+}
+
+var commands = map[string]string{
+  "!butt": "Praise booty!",
 }
