@@ -1,11 +1,24 @@
+function stripEventData(data) {
+  var messageData = {};
+  data.replace(/\[(\w+)\]\s:\s\[(.+)\]\s:\s(.+)/i, function(original, command, user, message) {
+    messageData = {
+      original,
+      command,
+      user,
+      message
+    }
+  });
+  console.log(messageData);
+  return messageData;
+}
 function connect(url) {
   var socket = new WebSocket(url);
   var actions = {
     ready: false,
     send(event, data) {
       if(this.ready) {
-        console.log("sent")
-        socket.send(`[${event}] : ${data}`);
+        // console.log("sent")
+        socket.send(`${data}`);
       } else {
         setTimeout(() => {
           this.send(event, data);
@@ -14,7 +27,7 @@ function connect(url) {
     },
     on(event, callback) {
       this[event] = callback;
-      console.log(this)
+      // console.log(this)
     }
   }
   socket.onopen = function(event) {
@@ -22,23 +35,27 @@ function connect(url) {
     actions.ready = true;
   }
   socket.onmessage = function(event) {
-    var messageData = {};
-    event.data.replace(/\[(\w+)\]\s:\s\[(.+)\]\s:\s(.+)/i, function(original, command, user, message) {
-      messageData = {
-        original,
-        command,
-        user,
-        message
-      }
-    });
+    // console.log(event);
+    var messageData = stripEventData(event.data);
     actions[messageData.command](messageData)
   };
   return actions;
 }
+document.querySelector(".input .submit").addEventListener("submit", sendMessege, false);
+var submitInput = document.querySelector(".input .submit input");
+var chatElement = document.querySelector(".chat-messages");
 
-var chatElement = document.querySelector(".chat-messages")
-var ws = connect("ws://localhost:8080/bot");
-ws.on("PRIVMSG", function(data) {
+function sendMessege(e) {
+  e.preventDefault();
+  ws.send("PRIVMSG", submitInput.value);
+  appendMessage({
+    user: "piecedigital",
+    message: submitInput.value
+  });
+  submitInput.value = "";
+};
+
+function appendMessage(data) {
   var li = document.createElement("li");
   li.setAttribute("data-username", data.user)
   var user = document.createElement("span");
@@ -51,4 +68,7 @@ ws.on("PRIVMSG", function(data) {
   li.innerHTML += "]: ";
   li.appendChild(message);
   chatElement.appendChild(li);
-});
+}
+
+var ws = connect("ws://localhost:8080/bot");
+ws.on("PRIVMSG", appendMessage);

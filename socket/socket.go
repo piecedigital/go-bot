@@ -2,6 +2,7 @@ package socket
 
 import (
   "fmt"
+  "time"
   "errors"
   "net/http"
   "gopkg.in/sorcix/irc.v1"
@@ -16,28 +17,30 @@ func StartSockets(res http.ResponseWriter, req *http.Request) int {
 }
 
 func socketHandler(ws *websocket.Conn) {
-  conn, err := bot.Connect(sendMessge, ws)
+  _, err := bot.Connect(sendMessage, receiveMessage, ws)
   if err != nil {
     fmt.Println(errors.New("Connection struct could not be gotten"))
     return
   }
-  receiveMessage(conn, ws)
 }
 
 func receiveMessage(conn *irc.Conn, ws *websocket.Conn) {
-  var in string
-  websocket.Message.Receive(ws, &in)
-  // if err != nil {
-  //   fmt.Println(errors.New("Connection struct could not be gotten"))
-  //   // return
-  // }
-  fmt.Printf("Received: %s\n", in)
-  bot.SendChatMessage(conn, &irc.Message{
-    Params: []string{"#" + "piecedigital"},
-    Trailing: in,
-  })
+  for {
+    // fmt.Print("\r\n\r\n READING SOCKET MESSAGES \r\n\r\n")
+    var in string
+    websocket.Message.Receive(ws, &in)
+    fmt.Printf("Received: %s\n", in)
+    command := bot.SendChatMessage(conn, &irc.Message{
+      Params: []string{"#" + "piecedigital"},
+      Trailing: in,
+    }, true)
+    if command != nil {
+      sendMessage(ws, "[PRIVMSG] : [piecedigital] : " + command.(string))
+    }
+    time.Sleep(time.Millisecond * 100)
+  }
 }
 
-func sendMessge(ws *websocket.Conn, s string)  {
+func sendMessage(ws *websocket.Conn, s string)  {
   websocket.Message.Send(ws, s)
 }
