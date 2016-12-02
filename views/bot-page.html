@@ -14,6 +14,17 @@
       margin: 0;
       padding: 16px;
     }
+    header {
+      position: absolute;
+      top: 5px;
+      left: 16px;
+    }
+    header > div {
+      display: inline-block;
+    }
+    .tools > * {
+      display: inline-block;
+    }
     .chat-box {
       position: relative;
       width: 100%;
@@ -23,9 +34,7 @@
       border-radius: 8px;
     }
     .chat-box .title {
-      position: absolute;
-      top: 5px;
-      left: 16px;
+
       margin: 0;
     }
     .chat-box .input {
@@ -34,9 +43,11 @@
       right: 16px;
     }
     .chat-box .chat-messages {
+      height: 100%;
       padding: 6px 0 0;
       margin: 0;
       box-shadow: inset 0 2px rgba(0,0,0,.5);
+      overflow: auto;
     }
     .chat-box .chat-messages li {
       list-style: none;
@@ -44,7 +55,19 @@
   </style>
   <body>
     <div class="chat-box">
-      <h1 class="title">Bot Page</h1>
+      <header class="">
+        <div class="title">
+          <h1 class="title">Bot Page | </h1>
+        </div>
+        <div class="tools">
+          <!-- <label for="">Username:</label>
+          <input type="text" name="username" value=""> -->
+          <label for="">Channel Name:</label>
+          <form class="channel-name" action="index.html" method="post">
+            <input type="text" name="channelname" value="">
+          </form>
+        </div>
+      </header>
       <ul class="chat-messages"></ul>
       <div class="input">
         <form class="submit" action="">

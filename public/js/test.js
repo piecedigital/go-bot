@@ -42,8 +42,12 @@ function connect(url) {
   return actions;
 }
 document.querySelector(".input .submit").addEventListener("submit", sendMessege, false);
+document.querySelector(".tools .channel-name").addEventListener("submit", makeConnection, false);
 var submitInput = document.querySelector(".input .submit input");
+var channelNameInput = document.querySelector(".tools .channel-name input");
 var chatElement = document.querySelector(".chat-messages");
+
+var ws;
 
 function sendMessege(e) {
   e.preventDefault();
@@ -70,5 +74,9 @@ function appendMessage(data) {
   chatElement.appendChild(li);
 }
 
-var ws = connect("ws://localhost:8080/bot?channel=bananaclawz");
-ws.on("PRIVMSG", appendMessage);
+function makeConnection(e) {
+  e.preventDefault();
+  channelNameInput.disabled = true;
+  ws = connect("ws://localhost:8080/bot?channel="+channelNameInput.value+"");
+  ws.on("PRIVMSG", appendMessage);
+}
