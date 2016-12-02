@@ -57,7 +57,7 @@ func reconnect( send func(ws *websocket.Conn, s string), receive func(conn *irc.
 func initMsgs(c *irc.Conn) error {
   // fmt.Println("init...", channelName)
   for _, message := range getInitMessages() {
-    fmt.Println("Message on connect", message)
+    // fmt.Println("Message on connect", message)
     outerr := c.Encode(message)
     if outerr != nil {
       fmt.Println(outerr)
@@ -68,7 +68,7 @@ func initMsgs(c *irc.Conn) error {
 }
 
 func getInitMessages() []*irc.Message {
-  fmt.Println("get init messages...", channelName)
+  // fmt.Println("get init messages...", channelName)
   messageSlice := []*irc.Message{
     &irc.Message{
       Params: []string{private.GetAuthToken()},
@@ -93,12 +93,12 @@ func checkForMessags( c *irc.Conn, botPageSend func(ws *websocket.Conn, s string
   }
   fmt.Printf("[READ] - %v\n", incoming)
   if incoming.Command == "PRIVMSG" {
-    fmt.Println("[" + incoming.Command + "] : [" + incoming.Prefix.User + "] : " + incoming.Trailing)
+    // fmt.Println("[" + incoming.Command + "] : [" + incoming.Prefix.User + "] : " + incoming.Trailing)
     botPageSend(ws, "[" + incoming.Command + "] : [" + incoming.Prefix.User + "] : " + incoming.Trailing)
     // to send chat command
     match, value := checkCommand(c, incoming)
     if match == true {
-      fmt.Println("Positive for command via input", incoming)
+      // fmt.Println("Positive for command via input", incoming)
       SendChatMessage(c, &irc.Message{
         Params: []string{"#" + channelName},
         Command: "PRIVMSG",
