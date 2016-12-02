@@ -3,11 +3,9 @@ package routes
 import (
   "fmt"
   "io"
-  "path"
-  "runtime"
   "net/http"
   "regexp"
-  "github.com/piecedigital/twitch-chat-bot/socket"
+  "../socket"
 )
 
 var methodMap = map[string]map[string](func(res http.ResponseWriter, req *http.Request) int) {
@@ -17,7 +15,7 @@ var methodMap = map[string]map[string](func(res http.ResponseWriter, req *http.R
 var pathMapGET = map[string](func(res http.ResponseWriter, req *http.Request) int) {
   "/": indexGet,
   "/bot-page": botGet,
-  "/bot": startSockets,
+  "/bot": socket.StartSockets,
 }
 
 func PipeRequests(res http.ResponseWriter, req *http.Request) {
@@ -29,7 +27,7 @@ func PipeRequests(res http.ResponseWriter, req *http.Request) {
 
   // serve static files if the path matches the public URL
   if match {
-    http.ServeFile(res, req, getPath("/.." + path))
+    http.ServeFile(res, req, "." + path)
     fmt.Printf("%v %v - %v\n", method, path, 200)
   } else
   // else, call the appropriate function
@@ -44,51 +42,16 @@ func PipeRequests(res http.ResponseWriter, req *http.Request) {
 }
 
 func fourOhFourGet(res http.ResponseWriter, req *http.Request) {
-  // fmt.Println("404 page")
   io.WriteString(res, "404: Not Found\n")
 }
 
 func indexGet(res http.ResponseWriter, req *http.Request) int {
-  // fmt.Println("index page")
-  http.ServeFile(res, req, getPath("/../views/index.html"))
+  http.ServeFile(res, req, "./views/index.html")
   // io.WriteString(res, "<h1>Hello World!</h1>")
   return 200
 }
 
 func botGet(res http.ResponseWriter, req *http.Request) int {
-  // fmt.Println("bot page")
-  http.ServeFile(res, req, getPath("/../views/bot-page.html"))
+  http.ServeFile(res, req, "./views/bot-page.html")
   return 200
-}
-
-func startSockets(res http.ResponseWriter, req *http.Request) int {
-  req.ParseForm()
-  channelName := "piecedigital"
-  form := req.Form
-  // fmt.Println(form)
-  if form != nil {
-    queryArray := form["channel"]
-    // fmt.Println(form)
-    if queryArray != nil {
-      name := queryArray[0]
-      // fmt.Println(form)
-      if name != "" {
-        channelName = name
-      }
-    }
-  }
-
-  fmt.Printf("channel: %v, type: %T\n", channelName, channelName)
-
-  statusCode := socket.StartSockets(res, req, channelName)
-  // return 200
-  return statusCode
-}
-
-func getPath(pathString string) string {
-  _, filename, _, _ := runtime.Caller(0)
-  // fmt.Printf("filename: %v\n", filename)
-  finalPath := path.Dir(filename) + pathString
-  // fmt.Printf("Final path: %v\n", finalPath)
-  return finalPath
 }

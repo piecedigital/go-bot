@@ -70,5 +70,5 @@ function appendMessage(data) {
   chatElement.appendChild(li);
 }
 
-var ws = connect("ws://localhost:8080/bot");
+var ws = connect("ws://localhost:8080/bot?channel=piecedigital2");
 ws.on("PRIVMSG", appendMessage);
