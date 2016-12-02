@@ -47,7 +47,7 @@ var submitInput = document.querySelector(".input .submit input");
 var channelNameInput = document.querySelector(".tools .channel-name input");
 var chatElement = document.querySelector(".chat-messages");
 
-var ws;
+var ws, lastChild;
 
 function sendMessege(e) {
   e.preventDefault();
@@ -71,7 +71,14 @@ function appendMessage(data) {
   li.appendChild(user);
   li.innerHTML += "]: ";
   li.appendChild(message);
-  chatElement.appendChild(li);
+  console.log(lastChild);
+  if(lastChild) {
+    chatElement.insertBefore(li, lastChild);
+    lastChild = li;
+  } else {
+    chatElement.appendChild(li);
+    lastChild = li;
+  }
 }
 
 function makeConnection(e) {
