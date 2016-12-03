@@ -43,8 +43,11 @@ function connect(url) {
 }
 document.querySelector(".input .submit").addEventListener("submit", sendMessege, false);
 document.querySelector(".tools .channel-name").addEventListener("submit", makeConnection, false);
+document.querySelector(".tools .close-connection").addEventListener("submit", closeConnection, false);
 var submitInput = document.querySelector(".input .submit input");
 var channelNameInput = document.querySelector(".tools .channel-name input");
+var channelNameBtn = document.querySelector(".tools .channel-name button");
+var closeConnBtn = document.querySelector(".tools .close-connection button");
 var chatElement = document.querySelector(".chat-messages");
 
 var ws, lastChild;
@@ -84,6 +87,67 @@ function appendMessage(data) {
 function makeConnection(e) {
   e.preventDefault();
   channelNameInput.disabled = true;
-  ws = connect("ws://localhost:8080/bot?channel="+channelNameInput.value+"");
+  channelNameBtn.disabled = true;
+  closeConnBtn.disabled = false;
+  ws = connect("ws://localhost:8080/bot?channel="+channelNameInput.value);
   ws.on("PRIVMSG", appendMessage);
 }
+
+function closeConnection(e) {
+  e.preventDefault();
+  channelNameInput.disabled = false;
+  channelNameBtn.disabled = false;
+  closeConnBtn.disabled = true;
+  ajax({
+    url: "http://localhost:8080/stop-bot",
+    success: function (data) {
+      console.log(data);
+    },
+    error: function (err) {
+      console.error(err);
+    }
+  });
+}
+
+function ajax(optionsObj) {
+	optionsObj = optionsObj || {};
+	// console.log(optionsObj.data);
+
+	var httpRequest = new XMLHttpRequest();
+	if(typeof optionsObj.upload === "function") httpRequest.upload.addEventListener("progress", optionsObj.upload, false);
+	httpRequest.onreadystatechange = function(data) {
+		if(httpRequest.readyState === 4) {
+			if(httpRequest.status < 400) {
+				if(typeof optionsObj.success === "function") {
+					optionsObj.success(data.target.response);
+				} else {
+					console.log("no success callback in ajax object");
+				}
+			} else {
+				if(typeof optionsObj.error === "function") {
+					optionsObj.error({
+						"status": data.target.status,
+						"message": data.target.statusText,
+						"response": data.target.response
+					});
+				} else {
+					console.log("no error callback in ajax object. logging error below");
+					console.error(data.target.status, data.target.statusText);
+				}
+			}
+		}
+	};
+	var contentTypes = {
+		jsonp: "application/javascript; charset=UTF-8",
+		json: "application/json; charset=UTF-8",
+		text: "text/plain; charset=UTF-8",
+		formdata: "multipart/form-data; boundary=---------------------------file0123456789end"
+	};
+
+	httpRequest.open(((optionsObj.type || "").toUpperCase() || "GET"), optionsObj.url, optionsObj.multipart || true);
+	if(optionsObj.dataType) httpRequest.setRequestHeader("Content-Type", `${contentTypes[(optionsObj.dataType.toLowerCase() || "text")]}`);
+	if(typeof optionsObj.beforeSend == "function") {
+		optionsObj.beforeSend(httpRequest);
+	}
+	httpRequest.send(optionsObj.data || null);
+};

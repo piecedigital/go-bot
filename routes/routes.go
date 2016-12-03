@@ -7,8 +7,11 @@ import (
   "runtime"
   "net/http"
   "regexp"
-  "github.com/piecedigital/twitch-chat-bot/socket"
+  "github.com/piecedigital/go-bot/socket"
 )
+
+// a channel to tell it to stop
+var stopchan = make(chan int)
 
 var methodMap = map[string]map[string](func(res http.ResponseWriter, req *http.Request) int) {
   "GET": pathMapGET,
@@ -18,6 +21,7 @@ var pathMapGET = map[string](func(res http.ResponseWriter, req *http.Request) in
   "/": indexGet,
   "/bot-page": botGet,
   "/bot": startSockets,
+  "/stop-bot": stopSockets,
 }
 
 func PipeRequests(res http.ResponseWriter, req *http.Request) {
@@ -78,10 +82,17 @@ func startSockets(res http.ResponseWriter, req *http.Request) int {
     }
   }
 
-  fmt.Printf("channel: %v, type: %T\n", channelName, channelName)
+  fmt.Println("GETMAP", pathMapGET)
+  fmt.Println("GETMAP")
+  fmt.Printf("SSchannel: %v, type: %T\n", channelName, channelName)
 
-  statusCode := socket.StartSockets(res, req, channelName)
+  statusCode := go socket.StartSockets(res, req, channelName, stopchan)
   // return 200
+  return statusCode
+}
+
+func stopSockets(res http.ResponseWriter, req *http.Request) int {
+  close(stopchan)
   return statusCode
 }
 

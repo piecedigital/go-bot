@@ -7,7 +7,7 @@ import (
   "time"
   "gopkg.in/sorcix/irc.v1"
   "golang.org/x/net/websocket"
-  "github.com/piecedigital/twitch-chat-bot/private"
+  "github.com/piecedigital/go-bot/private"
   "regexp"
 )
 

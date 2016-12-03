@@ -7,15 +7,19 @@ import (
   "net/http"
   "gopkg.in/sorcix/irc.v1"
   "golang.org/x/net/websocket"
-  "github.com/piecedigital/twitch-chat-bot/bot"
+  "github.com/piecedigital/go-bot/bot"
 )
 var channelName = "piecedigital"
 
-func StartSockets(res http.ResponseWriter, req *http.Request, name string) int {
+func StartSockets(res http.ResponseWriter, req *http.Request, name string, stopchan chan) int {
   channelName = name
   // channelName = "piecedigital"
   s := websocket.Server{Handler: websocket.Handler(socketHandler)}
   s.ServeHTTP(res, req)
+  // select {
+  //   case <- stopchan:
+  //     fmt.Println("quit")
+  // }
   return 200
 }
 

@@ -4,7 +4,7 @@ import (
   "fmt"
   "net/http"
   "log"
-  "github.com/piecedigital/twitch-chat-bot/routes"
+  "github.com/piecedigital/go-bot/routes"
 )
 
 func main()  {
