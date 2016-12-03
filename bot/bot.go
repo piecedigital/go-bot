@@ -98,7 +98,7 @@ func checkForMessags( c *irc.Conn, botPageSend func(ws *websocket.Conn, s string
     // to send chat command
     match, value := checkCommand(c, incoming)
     if match == true {
-      // fmt.Println("Positive for command via input", incoming)
+      fmt.Println("Positive for command via input", incoming)
       SendChatMessage(c, &irc.Message{
         Params: []string{"#" + channelName},
         Command: "PRIVMSG",
@@ -120,10 +120,16 @@ func checkForMessags( c *irc.Conn, botPageSend func(ws *websocket.Conn, s string
 
 func SendChatMessage(c *irc.Conn, msg *irc.Message, fromInterface bool) interface{} {
   message := &irc.Message{
+    Prefix: &irc.Prefix{
+      botAccount,
+      botAccount,
+      "tmi.twitch.tv",
+    },
     Params: msg.Params,
-    Command: "PRIVMSG",
+    Command: msg.Command,
     Trailing: msg.Trailing,
   }
+  fmt.Println("IRC relay -", message)
   outerr := c.Encode(message)
   if outerr != nil {
     fmt.Println(outerr)
@@ -131,7 +137,9 @@ func SendChatMessage(c *irc.Conn, msg *irc.Message, fromInterface bool) interfac
   if fromInterface == true {
     match, value := checkCommand(c, msg)
     if match == true {
-      fmt.Println("Positive for command via command", msg)
+      fmt.Println("Positive for command via interface", msg)
+      fmt.Println("Sleep", time.Millisecond * 200)
+      time.Sleep(time.Millisecond * 200)
       SendChatMessage(c, &irc.Message{
         Params: []string{"#" + channelName},
         Command: "PRIVMSG",

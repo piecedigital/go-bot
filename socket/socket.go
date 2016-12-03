@@ -11,7 +11,7 @@ import (
 )
 var channelName = "piecedigital"
 
-func StartSockets(res http.ResponseWriter, req *http.Request, name string, stopchan chan) int {
+func StartSockets(res http.ResponseWriter, req *http.Request, name string, statusChan chan int, stopChan chan int) {
   channelName = name
   // channelName = "piecedigital"
   s := websocket.Server{Handler: websocket.Handler(socketHandler)}
@@ -20,7 +20,8 @@ func StartSockets(res http.ResponseWriter, req *http.Request, name string, stopc
   //   case <- stopchan:
   //     fmt.Println("quit")
   // }
-  return 200
+  // return 200
+  statusChan <- 200
 }
 
 func socketHandler(ws *websocket.Conn) {
@@ -39,6 +40,7 @@ func receiveMessage(conn *irc.Conn, ws *websocket.Conn) {
     fmt.Printf("WS Received: %s\n", in)
     command := bot.SendChatMessage(conn, &irc.Message{
       Params: []string{"#" + channelName},
+      Command: "PRIVMSG",
       Trailing: in,
     }, true)
     if command != nil {

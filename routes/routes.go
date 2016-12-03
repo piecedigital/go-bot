@@ -11,7 +11,7 @@ import (
 )
 
 // a channel to tell it to stop
-var stopchan = make(chan int)
+var stopChan = make(chan int)
 
 var methodMap = map[string]map[string](func(res http.ResponseWriter, req *http.Request) int) {
   "GET": pathMapGET,
@@ -82,18 +82,20 @@ func startSockets(res http.ResponseWriter, req *http.Request) int {
     }
   }
 
-  fmt.Println("GETMAP", pathMapGET)
-  fmt.Println("GETMAP")
-  fmt.Printf("SSchannel: %v, type: %T\n", channelName, channelName)
+  fmt.Printf("channel: %v, type: %T\n", channelName, channelName)
 
-  statusCode := go socket.StartSockets(res, req, channelName, stopchan)
+  var statusChan = make(chan int)
+
+  go socket.StartSockets(res, req, channelName, statusChan, stopChan)
+  // return 200
+  statusCode := <- statusChan
   // return 200
   return statusCode
 }
 
 func stopSockets(res http.ResponseWriter, req *http.Request) int {
-  close(stopchan)
-  return statusCode
+  close(stopChan)
+  return 200
 }
 
 func getPath(pathString string) string {
