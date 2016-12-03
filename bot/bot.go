@@ -138,8 +138,8 @@ func SendChatMessage(c *irc.Conn, msg *irc.Message, fromInterface bool) interfac
     match, value := checkCommand(c, msg)
     if match == true {
       fmt.Println("Positive for command via interface", msg)
-      fmt.Println("Sleep", time.Millisecond * 200)
-      time.Sleep(time.Millisecond * 200)
+      fmt.Println("Sleep", time.Millisecond * 500)
+      time.Sleep(time.Millisecond * 500)
       SendChatMessage(c, &irc.Message{
         Params: []string{"#" + channelName},
         Command: "PRIVMSG",
