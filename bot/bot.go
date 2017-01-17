@@ -123,7 +123,7 @@ func SendChatMessage(c *irc.Conn, msg *irc.Message, fromInterface bool) interfac
     Prefix: &irc.Prefix{
       botAccount,
       botAccount,
-      "tmi.twitch.tv",
+      botAccount + ".tmi.twitch.tv",
     },
     Params: msg.Params,
     Command: msg.Command,
@@ -138,8 +138,6 @@ func SendChatMessage(c *irc.Conn, msg *irc.Message, fromInterface bool) interfac
     match, value := checkCommand(c, msg)
     if match == true {
       fmt.Println("Positive for command via interface", msg)
-      fmt.Println("Sleep", time.Second * 1)
-      time.Sleep(time.Second * 1)
       SendChatMessage(c, &irc.Message{
         Params: []string{"#" + channelName},
         Command: "PRIVMSG",
