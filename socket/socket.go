@@ -9,11 +9,11 @@ import (
   "golang.org/x/net/websocket"
   "github.com/piecedigital/go-bot/bot"
 )
-var channelName = "piecedigital"
+var channelName = "piecebot"
 
 func StartSockets(res http.ResponseWriter, req *http.Request, name string, statusChan chan int, stopChan chan int) {
   channelName = name
-  // channelName = "piecedigital"
+  // channelName = "piecebot"
   s := websocket.Server{Handler: websocket.Handler(socketHandler)}
   s.ServeHTTP(res, req)
   // select {
@@ -44,7 +44,7 @@ func receiveMessage(conn *irc.Conn, ws *websocket.Conn) {
       Trailing: in,
     }, true)
     if command != nil {
-      sendMessage(ws, "[PRIVMSG] : [piecedigital] : " + command.(string))
+      sendMessage(ws, "[PRIVMSG] : [piecebot] : " + command.(string))
     }
     time.Sleep(time.Millisecond * 100)
   }

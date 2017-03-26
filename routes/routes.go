@@ -67,7 +67,7 @@ func botGet(res http.ResponseWriter, req *http.Request) int {
 
 func startSockets(res http.ResponseWriter, req *http.Request) int {
   req.ParseForm()
-  channelName := "piecedigital"
+  channelName := "piecebot"
   form := req.Form
   // fmt.Println(form)
   if form != nil {

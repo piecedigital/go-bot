@@ -56,7 +56,7 @@ function sendMessege(e) {
   e.preventDefault();
   ws.send("PRIVMSG", submitInput.value);
   appendMessage({
-    user: "piecedigital",
+    user: "piecebot",
     message: submitInput.value
   });
   submitInput.value = "";
