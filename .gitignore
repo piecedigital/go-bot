@@ -1,2 +1,4 @@
 private/private.go
 bot/quote/node_modules
+bot/quote/strange-stuff*.json
+bot/quote/test*
